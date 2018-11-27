@@ -4,6 +4,10 @@ var EPglobal;
 
 var idDeparment;
 
+var metrics_score_temp = 0;
+var kpi_score_total_temp = 0;
+
+
 $(function () {
 
   Search();
@@ -17,6 +21,7 @@ $(function () {
   });
 
 });
+
 
 function Search() {
 
@@ -39,6 +44,7 @@ function Search() {
     });
   });
 }
+
 
 function ShowEmployeeProfile(value) {
   $("#KPIdata").empty();
@@ -99,6 +105,7 @@ function ShowEmployeeProfile(value) {
   });
 }
 
+
 function ReadDepartment() {
 
   $.ajax({
@@ -131,6 +138,7 @@ function ReadDepartment() {
     }
   });
 }
+
 
 function FilterDepartment() {
 
@@ -169,126 +177,6 @@ function FilterDepartment() {
   })
 }
 
-function getKPInoScore(positionTitle) {
-
-  var en = positionTitle;
-  var encoded = encodeURIComponent(en);
-
-
-  var th_KPI = "";
-  var td_EmployeeFname = "";
-  var td_EmployeeLname = "";
-  var td_EmployeeId = "";
-  var td_Score = "";
-
-  $('#employee_table').empty();
-  $('#listEmployee').empty();
-
-  $.ajax({
-    url: _spPageContextInfo.webAbsoluteUrl + "/_api/Web/Lists/getbytitle('Key%20Performance%20Indicator')/items?$select=Title,ID,Position_x0020_Title/ID&$expand=Position_x0020_Title&$filter=Position_x0020_Title/Title eq '" + encoded + "' ",
-    method: "GET",
-    headers: {
-      "Accept": "application/json; odata=verbose"
-    },
-    success: function (data) {
-
-      dataKPI = data.d.results;
-
-      $.ajax({
-        url: _spPageContextInfo.webAbsoluteUrl + "/_api/Web/Lists/getbytitle('Employee%20Profile')/items?$select=LI_FirstName,LI_LastName,LI_PositionTitle,LI_Department,Id,LI_EmployeeID&$orderby=LI_FirstName asc &$filter=LI_PositionTitle eq '" + encoded + "' and LI_Department eq '" + idDeparment + "' ",
-        method: "GET",
-        headers: {
-          "Accept": "application/json; odata=verbose"
-        },
-        success: function (data) {
-
-          dataEmployeeP = data.d.results;
-
-
-          $.ajax({
-            url: _spPageContextInfo.webAbsoluteUrl + "/_api/Web/Lists/getbytitle('Key%20Performance%20Score%20Storage')/items?$select=ID,Score,KPI_x0020_Title/Title,Employee/LI_EmployeeID,KPI_x0020_Title/Id&$expand=KPI_x0020_Title,Employee&$filter= (Month eq 'October' ) and (Year eq '2018' ) and (Position_x0020_Title/Title eq '" + encoded + "') &$OrderBy=KPI_x0020_Title/Title desc",
-            method: "GET",
-            headers: {
-              "Accept": "application/json; odata=verbose"
-            },
-            success: function (data) {
-
-              KPSSglobal = data.d.results;
-
-
-              // var count = dataKPI.length;
-              // var i = 1;
-              // $.each(dataKPI, function(index, valueKPI) {
-
-              //     td_Score += "<td scope='col'>" + "0" + "</td>";
-              //     th_KPI += "<th scope='col' id='" + valueKPI.ID + "'>" + valueKPI.Title + "</th>";
-
-              //     if (i == count) {
-
-              //         $.each(dataEmployeeP, function(index, valueEmployeeP) {
-
-              //             td_EmployeeFname = valueEmployeeP.LI_FirstName;
-              //             td_EmployeeLname = valueEmployeeP.LI_LastName;
-              //             td_EmployeeId = valueEmployeeP.Id;
-
-              //             $('#listEmployee').append("<tr><td class='sticky_col0'>" + td_EmployeeFname + " " + td_EmployeeLname + "</td>" +
-              //                 td_Score + "<td class='sticky_col1'>" + "0" + "</td>" +
-              //                 "<td class='sticky_col2'><a href='#' onclick='ShowEmployeeProfile(" + td_EmployeeId + ")'>View</a></td>" +
-              //                 "</tr>");
-
-
-              //         });
-              //     }
-
-              //     i++;
-
-              // });
-
-
-
-              if (KPSSglobal != "") {
-
-                console.log("Have Data to show")
-                $('#alert').hide();
-                $('.table-scroll').show();
-                // $('#listEmployee').append("<tr><td class='sticky_col0'>" + td_EmployeeFname + " " + td_EmployeeLname + "</td>" +
-                // td_Score + "<td class='sticky_col1'>" + "0" + "</td>" +
-                // "<td class='sticky_col2'><a href='#' onclick='ShowEmployeeProfile(" + td_EmployeeId + ")'>View</a></td>" +
-                // "</tr>");
-
-                $('#employee_table').append("<th class='sticky_col0' style='width:130px!important' scope='col'>Employee name</th>" + th_KPI + "<th class='sticky_col1' scope='col' style='width:80px!important'>Average</th><th class='sticky_col2' scope='col' style='width:80px!important'>Action</th>")
-              } else {
-                console.log("No Data to show")
-                $('.table-scroll').hide();
-                $('#alert').show();
-              }
-
-
-
-            },
-            error: function (error) {
-              console.log(JSON.stringify(error));
-            }
-          });
-
-
-
-
-        },
-        error: function (error) {
-          console.log(JSON.stringify(error));
-        }
-      });
-
-
-
-
-    },
-    error: function (error) {
-      console.log("error")
-    }
-  });
-}
 
 function getKPI(value) {
 
@@ -304,8 +192,9 @@ function getKPI(value) {
 
 
 
+
   $.ajax({
-    url: _spPageContextInfo.webAbsoluteUrl + "/_api/Web/Lists/getbytitle('Key%20Performance%20Indicator')/items?$select=Title,ID,Position_x0020_Title/ID&$expand=Position_x0020_Title&$filter=Position_x0020_Title/Title eq '" + pos_title + "' ",
+    url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Key Performance Indicator')/items?$select=Title, ID, Department/Title, Position_x0020_Title/Title, Position_x0020_Title/ID, Key_x0020_Result_x0020_Area/Title, Key_x0020_Result_x0020_Area/ID, Minimum_x0020_Score, Maximum_x0020_Score&$expand=Department&$expand=Position_x0020_Title&$expand=Key_x0020_Result_x0020_Area&$OrderBy=Key_x0020_Result_x0020_Area/Title&$filter=Position_x0020_Title/Title eq '" + pos_title + "' &$OrderBy=Title desc",
     method: "GET",
     headers: {
       "Accept": "application/json; odata=verbose"
@@ -313,14 +202,15 @@ function getKPI(value) {
     success: function (data) {
       $('#alert').hide();
 
+
       KPIglobal = data.d.results;
-      console.log("---KPIglobal---")
-      console.log(KPIglobal)
-      console.log("---KPIglobal---")
+
+      DisplayMetricsInfo();
+
 
       if (KPIglobal.length > 0) {
 
-        console.log("KPIglocal T-State")
+
         $.ajax({
           url: _spPageContextInfo.webAbsoluteUrl + "/_api/Web/Lists/getbytitle('Key%20Performance%20Score%20Storage')/items?$select=ID,Score,KPI_x0020_Title/Title,Employee/LI_EmployeeID,KPI_x0020_Title/Id&$expand=KPI_x0020_Title,Employee&$filter= (Month eq 'October' ) and (Year eq '2018' ) and (Position_x0020_Title/Title eq '" + pos_title + "') &$OrderBy=KPI_x0020_Title/Title desc",
           method: "GET",
@@ -329,7 +219,9 @@ function getKPI(value) {
           },
           success: function (data) {
 
+
             KPSSglobal = data.d.results;
+
 
             $.ajax({
               url: _spPageContextInfo.webAbsoluteUrl + "/_api/Web/Lists/getbytitle('Employee%20Profile')/items?$select=LI_FirstName,LI_LastName,LI_PositionTitle,LI_Department,LI_Separated,Id,LI_EmployeeID&$orderby=LI_FirstName asc &$filter= (LI_PositionTitle eq '" + pos_title + "' ) and (LI_Department eq '" + idDeparment + "') and (LI_Separated eq 'Active')",
@@ -339,12 +231,13 @@ function getKPI(value) {
               },
               success: function (data) {
 
+
                 EPglobal = data.d.results;
 
+
                 if (KPSSglobal.length > 0) {
-                  console.log("KPSSglobal T-State");
+
                   if (EPglobal.length > 0) {
-                    console.log("EPglobal T-State:1");
 
                     $.each(EPglobal, function (index, value3) {
 
@@ -357,13 +250,13 @@ function getKPI(value) {
                         $.each(KPIglobal, function (index, value) {
 
                           var KPI_Id = value.Id;
-                          var kpi_title = value.Title;
 
 
                           if (KPI_Id == value2.KPI_x0020_Title.Id && value3.LI_EmployeeID == value2.Employee.LI_EmployeeID) {
                             td_element += "<td id='" + value2.ID + "'>" + value2.Score + "</td>"
                             th_element += "<th scope='col' id='" + value.Id + "'>" + value.Title + "</th>";
                             td_score += value2.Score;
+
                           }
 
                         }); //foreach dataGlobale
@@ -389,8 +282,6 @@ function getKPI(value) {
 
 
                 } else {
-                  console.log("KPSSglobal F-State")
-                  var element = '';
 
                   var td_element = "";
                   var th_element = "";
@@ -400,10 +291,7 @@ function getKPI(value) {
                     th_element += "<th scope='col' id='" + KPIglobal[i].ID + "'>" + KPIglobal[i].Title + "</th>";
                     td_element += "<td>0</td>";
 
-
                   }
-
-
 
 
                   if (EPglobal.length > 0) {
@@ -423,15 +311,7 @@ function getKPI(value) {
                     $('#alert').show();
                   }
 
-
-
-
-
-
-
                 }
-
-
 
               }, //3rd ajax success
               error: function (error) {
@@ -440,15 +320,12 @@ function getKPI(value) {
             }); //3rd ajax
 
 
-
-
-
-
           }, //2nd ajax success
           error: function (error) {
             console.log(JSON.stringify(error));
           }
         }); //2nd ajax 
+
 
       } else {
         console.log("KPIglobal F-State")
@@ -477,6 +354,7 @@ function storeKPI(kpi_id) {
   var scores = $('#score').val();
   var commentss = $('#comments').val();
 }
+
 
 function passKPI() {
   console.log("Yes Pass")
@@ -507,4 +385,165 @@ function passKPI() {
       alert(JSON.stringify(error));
     }
   });
+}
+
+
+function DisplayMetricsInfo() {
+
+  var kpi_select_dept_val = $("#filter_department_id").val();
+  var kpi_select_pos_val = $("#filter_position_id").val();
+  var datares_kpi = KPIglobal;
+  console.log(datares_kpi)
+
+  var datares_metrics;
+  metrics_score_temp = 0;
+  kpi_score_total_temp = 0;
+  //////////console.log("-------------DROPDOWN START-------------")
+
+  /*  $('#kpi_total_progress_id').progress({
+                 percent: kpi_score_total_temp
+             });*/
+  $.ajax({
+    url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Metrics')/items?$select=Title, ID, Key_x0020_Performance_x0020_Indi/Title,Key_x0020_Performance_x0020_Indi/ID, Score, Remarks&$expand=Key_x0020_Performance_x0020_Indi&$OrderBy=Score",
+    method: "GET",
+    headers: {
+      "Accept": "application/json; odata=verbose"
+    },
+    success: function (data) {
+      datares_metrics = data.d.results;
+      //////////console.log("----------datares_metrics----------");
+      //////////console.log(datares_metrics);
+
+      $("#table_kpi").find("tr:gt(0)").remove();
+      var count_total_kpi = 0;
+      // var metric_score = 0;
+      kpi_score_total_temp = 0;
+      for (var a = 0; a < datares_kpi.length; a++) {
+        var kra_title = datares_kpi[a].Key_x0020_Result_x0020_Area.Title;
+        var kra_id = datares_kpi[a].Key_x0020_Result_x0020_Area.ID;
+        var kpi_title = datares_kpi[a].Title;
+        var kpi_id = datares_kpi[a].ID;
+
+
+        count_total_kpi++;
+        ////////////console.log(datares[a].Title+" ID: "+datares[a].ID);   
+
+        var metrics_append = "";
+
+        var metric_score = 0;
+
+        for (var b = 0; b < datares_metrics.length; b++) {
+          ////////////console.log("datares_kpi["+a+"].ID: "+datares_kpi[a].ID);
+          if (datares_kpi[a].ID == datares_metrics[b].Key_x0020_Performance_x0020_Indi.ID) {
+
+            var metric_id = datares_metrics[b].ID;
+            var metric_title = datares_metrics[b].Title;
+            metric_score = datares_metrics[b].Score;
+            var metric_remarks = datares_metrics[b].Remarks;
+
+            metrics_append += "<tr><td>" + metric_title + "</td><td>" + metric_score + "%</td><td>" + metric_remarks + "</td></tr>";
+
+          }
+
+
+
+        }
+
+        kpi_score_total_temp += metric_score;
+
+
+        $('#table_kpi').append("<tr><td id='krakey-" + kra_id + "' data-id='key" + kra_id + "'> <div class='' id='kra_title_" + kra_id + "' style='' >" + kra_title + "</div></td><td><div class='' id='count_kra-" + kra_id + "'  style=''  >" + kpi_title + "</div></td><td>Sharepoint/Requestor/TQM</td><td style='padding: 0px;'>" +
+          "<table class='ui very basic collapsing striped celled table' style='text-align: center; '> <thead> <tr><th width='75%' style='background: #FFFF00!important;' id='th_kpi_title_" + kpi_id + "' >" + kpi_title + "</th> <th style='background: #FFFF00!important;'>Score(%)</th> <th width='25%' style='background: #FFFF00!important;'>Remarks</th></tr></thead><tbody id='tbody-" + kpi_id + "'>" +
+          metrics_append +
+          " </tbody></table>" +
+          "</td></tr>");
+
+
+      } //end for loop
+
+
+      $.ajax({
+        url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Key Result Area')/items?$select=Title, ID,  Position_x0020_Title/Title, Position_x0020_Title/ID&$expand=Position_x0020_Title&$OrderBy=Title&$filter=Position_x0020_Title/ID eq '" + kpi_select_pos_val + "' ",
+
+        method: "GET",
+        headers: {
+          "Accept": "application/json; odata=verbose"
+        },
+        success: function (data) {
+          var datares = data.d.results;
+          //////////////console.log(datares)
+          // $('#kpi_select_pos').dropdown('clear')
+
+          for (var a = 0; a < datares.length; a++) {
+            //////////////console.log(datares[a].Title+" ID: "+datares[a].ID);
+            //$('#kpi_select_kra').append('<option value="' + datares[a].ID + '">' + datares[a].Title + '</option>');
+            //krakey-12
+            if (!$("#krakey-" + datares[a].ID + " ").length) {
+              //////////console.log("Not Exist")
+              $('#table_kpi').append("<tr><td><div class='ui large label'>" + datares[a].Title + " <i class='delete icon' onClick='delete_kra_onClick(" + datares[a].ID + ")'></i></div></td><td></td><td></td><td></td></tr>");
+            }
+            //$('#table_kpi').append("<tr><td>KRA Here</td><td></td><td></td><td></td></tr>");
+
+          }
+        },
+        error: function (error) {
+          alert(JSON.stringify(error));
+        }
+      });
+
+
+      if (kpi_score_total_temp == 0) {
+        $('#kpi_total_progress_id').removeClass('success');
+      }
+
+      $('#kpi_total_progress_id').progress({
+        percent: kpi_score_total_temp
+      });
+
+      // ////////console.log("kpi_score_total_temp: "+kpi_score_total_temp);
+
+      $('#kpi_count_label_id').html("Total KPI: " + count_total_kpi);
+
+      //alert(kpi_score_total_temp);
+
+
+      mergerKey();
+
+
+    },
+    error: function (error) {
+      alert(JSON.stringify(error));
+    }
+  });
+}
+
+//merge cells in key column
+function mergerKey() {
+
+  // prevents the same attribute is used more than once Ip
+  var idA = [];
+
+  // finds all cells id column Key
+  $('td[data-id^="key"]').each(function () {
+
+    var id = $(this).attr('data-id');
+
+    // prevents the same attribute is used more than once IIp
+    if ($.inArray(id, idA) == -1) {
+      idA.push(id);
+
+      // finds all cells that have the same data-id attribute
+      var $td = $('td[data-id="' + id + '"]');
+
+      //counts the number of cells with the same data-id
+      var count = $td.length;
+      if (count > 1) {
+
+        //If there is more than one
+        //then merging                                
+        $td.not(":eq(0)").remove();
+        $td.attr('rowspan', count);
+      }
+    }
+  })
 }
